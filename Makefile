@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 .PHONY: all
-all: checks
+all: checks unit-test
 
 .PHONY: checks
 checks: license lint
@@ -15,3 +15,6 @@ lint:
 .PHONY: license
 license:
 	@scripts/check_license.sh
+
+unit-test:
+	@scripts/check_unit.sh
