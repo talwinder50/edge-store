@@ -4,6 +4,7 @@
 
 GO_CMD ?= go
 EDGE_AUTH_REST_PATH=cmd/edge-auth-rest
+STRAPI_DEMO_PATH=cmd/strapi-demo
 
 .PHONY: all
 all: checks unit-test
@@ -38,3 +39,17 @@ edge-auth-rest:
 	@echo "Building edge-auth-rest"
 	@mkdir -p ./build/bin
 	@cd ${EDGE_AUTH_REST_PATH} && go build -o ../../build/bin/edge-auth-rest main.go
+
+strapi-build:
+	@echo "Building strapi demo"
+	@mkdir -p ./build/bin
+	@cd ${STRAPI_DEMO_PATH} && go build -o ../../build/bin/strapi-demo main.go
+
+strapi-start:
+	@scripts/strapi-start.sh
+
+strapi-stop:
+	@scripts/strapi-stop.sh
+
+strapi-setup:
+	@scripts/strapi-setup.sh

@@ -40,3 +40,11 @@ PKGS=`go list github.com/trustbloc/edge-store/cmd/edge-auth-rest/... 2> /dev/nul
 go test $PKGS -count=1 -race -coverprofile=profile.out -covermode=atomic -timeout=10m
 amend_coverage_file
 cd "$pwd" || exit
+
+# Running strapi-demo unit tests
+cd cmd/strapi-demo
+PKGS=`go list github.com/trustbloc/edge-store/cmd/strapi-demo/... 2> /dev/null | \
+                                                 grep -v /mocks`
+go test $PKGS -count=1 -race -coverprofile=profile.out -covermode=atomic -timeout=10m
+amend_coverage_file
+cd "$pwd" || exit
