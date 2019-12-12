@@ -8,7 +8,6 @@ package startcmd
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -94,9 +93,6 @@ func startEdgeAuth(parameters *edgeAuthParameters) error {
 	}
 
 	err = parameters.srv.ListenAndServe(parameters.hostURL, router)
-	if err != nil {
-		return fmt.Errorf("edge-auth server closed unexpectedly: %s", err)
-	}
 
-	return nil
+	return err
 }
