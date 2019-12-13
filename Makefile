@@ -18,3 +18,15 @@ license:
 
 unit-test:
 	@scripts/check_unit.sh
+
+hydra-start:
+	@scripts/hydra_start.sh
+
+hydra-configure:
+	@scripts/hydra_configure.sh
+
+hydra-stop:
+	@scripts/hydra_stop.sh
+
+hydra-test-app:
+	@scripts/hydra_test_app.sh
