@@ -2,6 +2,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+GO_CMD ?= go
+EDGE_AUTH_REST_PATH=cmd/edge-auth-rest
+
 .PHONY: all
 all: checks unit-test
 
@@ -30,3 +33,8 @@ hydra-stop:
 
 hydra-test-app:
 	@scripts/hydra_test_app.sh
+
+edge-auth-rest:
+	@echo "Building edge-auth-rest"
+	@mkdir -p ./build/bin
+	@cd ${EDGE_AUTH_REST_PATH} && go build -o ../../build/bin/edge-auth-rest main.go

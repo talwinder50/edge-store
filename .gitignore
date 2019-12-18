@@ -24,3 +24,6 @@ vendor
 .DS_Store
 
 coverage.txt
+
+# Exclude build directory
+build
