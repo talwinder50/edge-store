@@ -14,14 +14,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
+	"github.com/trustbloc/edge-store/pkg/restapi/auth"
 	cmdutils "github.com/trustbloc/edge-store/pkg/utils/cmd"
 )
 
 const (
 	hostURLFlagName      = "host-url"
 	hostURLFlagShorthand = "u"
-	hostURLFlagUsage     = "URL to run the edge-store instance on. Format: HostName:Port."
-	hostURLEnvKey        = "EDGE-STORE_HOST_URL"
+	hostURLFlagUsage     = "URL to run the edge-auth instance on. Format: HostName:Port."
+	hostURLEnvKey        = "EDGE-AUTH_HOST_URL"
 )
 
 var errMissingHostURL = errors.New("host URL not provided")
@@ -38,7 +39,7 @@ func (s *HTTPServer) ListenAndServe(host string, router http.Handler) error {
 	return http.ListenAndServe(host, router)
 }
 
-type edgeStoreParameters struct {
+type edgeAuthParameters struct {
 	srv     server
 	hostURL string
 }
@@ -55,18 +56,18 @@ func GetStartCmd(srv server) *cobra.Command {
 func createStartCmd(srv server) *cobra.Command {
 	return &cobra.Command{
 		Use:   "start",
-		Short: "Start edge-store",
-		Long:  "Start edge-store",
+		Short: "Start edge-auth",
+		Long:  "Start edge-auth",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			hostURL, err := cmdutils.GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey)
 			if err != nil {
 				return err
 			}
-			parameters := &edgeStoreParameters{
+			parameters := &edgeAuthParameters{
 				srv:     srv,
 				hostURL: hostURL,
 			}
-			return startEdgeStore(parameters)
+			return startEdgeAuth(parameters)
 		},
 	}
 }
@@ -75,17 +76,27 @@ func createFlags(startCmd *cobra.Command) {
 	startCmd.Flags().StringP(hostURLFlagName, hostURLFlagShorthand, "", hostURLFlagUsage)
 }
 
-func startEdgeStore(parameters *edgeStoreParameters) error {
+func startEdgeAuth(parameters *edgeAuthParameters) error {
 	if parameters.hostURL == "" {
 		return errMissingHostURL
 	}
 
-	router := mux.NewRouter()
-
-	err := parameters.srv.ListenAndServe(parameters.hostURL, router)
+	authService, err := auth.New()
 	if err != nil {
-		return fmt.Errorf("edge-store server closed unexpectedly: %s", err)
+		return err
 	}
 
-	return err
+	handlers := authService.GetOperations()
+	router := mux.NewRouter()
+
+	for _, handler := range handlers {
+		router.HandleFunc(handler.Path(), handler.Handle()).Methods(handler.Method())
+	}
+
+	err = parameters.srv.ListenAndServe(parameters.hostURL, router)
+	if err != nil {
+		return fmt.Errorf("edge-auth server closed unexpectedly: %s", err)
+	}
+
+	return nil
 }

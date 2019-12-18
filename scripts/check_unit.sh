@@ -31,4 +31,12 @@ PKGS=`go list github.com/trustbloc/edge-store/cmd/edge-store-rest/... 2> /dev/nu
                                                  grep -v /mocks`
 go test $PKGS -count=1 -race -coverprofile=profile.out -covermode=atomic -timeout=10m
 amend_coverage_file
+cd "$pwd"
+
+# Running edge-auth-rest unit tests
+cd cmd/edge-auth-rest
+PKGS=`go list github.com/trustbloc/edge-store/cmd/edge-auth-rest/... 2> /dev/null | \
+                                                 grep -v /mocks`
+go test $PKGS -count=1 -race -coverprofile=profile.out -covermode=atomic -timeout=10m
+amend_coverage_file
 cd "$pwd" || exit

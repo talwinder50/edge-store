@@ -4,10 +4,13 @@
 
 module github.com/trustbloc/edge-store/cmd/edge-store-rest
 
-go 1.13
+replace github.com/trustbloc/edge-store => ../..
 
 require (
 	github.com/gorilla/mux v1.7.3
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
+	github.com/trustbloc/edge-store v0.0.0
 )
+
+go 1.13
