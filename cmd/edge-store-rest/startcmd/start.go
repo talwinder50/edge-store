@@ -8,12 +8,13 @@ package startcmd
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
+	"github.com/trustbloc/edge-store/pkg/restapi/edv"
+	"github.com/trustbloc/edge-store/pkg/storage/memstore"
 	cmdutils "github.com/trustbloc/edge-store/pkg/utils/cmd"
 )
 
@@ -26,6 +27,11 @@ const (
 
 var errMissingHostURL = errors.New("host URL not provided")
 
+type edgeStoreParameters struct {
+	srv     server
+	hostURL string
+}
+
 type server interface {
 	ListenAndServe(host string, router http.Handler) error
 }
@@ -36,11 +42,6 @@ type HTTPServer struct{}
 // ListenAndServe starts the server using the standard Go HTTP server implementation.
 func (s *HTTPServer) ListenAndServe(host string, router http.Handler) error {
 	return http.ListenAndServe(host, router)
-}
-
-type edgeStoreParameters struct {
-	srv     server
-	hostURL string
 }
 
 // GetStartCmd returns the Cobra start command.
@@ -80,12 +81,19 @@ func startEdgeStore(parameters *edgeStoreParameters) error {
 		return errMissingHostURL
 	}
 
+	edvService, err := edv.New(memstore.NewProvider())
+	if err != nil {
+		return err
+	}
+
+	handlers := edvService.GetOperations()
 	router := mux.NewRouter()
 
-	err := parameters.srv.ListenAndServe(parameters.hostURL, router)
-	if err != nil {
-		return fmt.Errorf("edge-store server closed unexpectedly: %s", err)
+	for _, handler := range handlers {
+		router.HandleFunc(handler.Path(), handler.Handle()).Methods(handler.Method())
 	}
+
+	err = parameters.srv.ListenAndServe(parameters.hostURL, router)
 
 	return err
 }
